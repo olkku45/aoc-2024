@@ -26,8 +26,6 @@ def reading_check(file):
 
         if "don't" in part:
             reading = False
-        elif "do" in part:
-            reading = True
 
         if not reading:
             while file_copy:
@@ -36,8 +34,7 @@ def reading_check(file):
                 if "do" in part:
                     reading = True
                     break
-
-    print(removed)
+                
     reconstructed = reconstruct(removed)
     return reconstructed    
 
