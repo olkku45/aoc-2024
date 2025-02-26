@@ -1,4 +1,3 @@
-import numpy as np
 import random
 import time
 start_time = time.time()
