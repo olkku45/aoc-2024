@@ -2,8 +2,6 @@ import random
 import time
 start_time = time.time()
 
-random_number = random.randint(1, 1000)
-
 with open("6.txt", "r") as file:
     matrix = [list(line.strip()) for line in file]
 
