@@ -1,4 +1,5 @@
 import numpy as np
+from collections import defaultdict, deque
 
 rules = []
 pages = []
@@ -32,37 +33,57 @@ for line in pages:
     new_line = line.split(",")
     new_pages.append(new_line)
 
-int_list = [[int(num) for num in sublist] for sublist in rwd_to_list] 
+rule_list = [[int(num) for num in sublist] for sublist in rwd_to_list] 
 new_pages = [[int(num) for num in sublist] for sublist in new_pages]
 
-incorrectly_ordered = []
 
-for line in new_pages:
-    to_swap = False
+# just prooompt engineered my way into this shit, I can't do this myself :sob: I really suck, huh
+def conditional_topological_sort_sublist_by_sublist(lists, conditions):
+    def is_sorted(sublist, conditions):
+        for x, y in conditions:
+            if x in sublist and y in sublist:
+                if sublist.index(x) > sublist.index(y):
+                    return False
+        return True
 
-    for num1, num2 in int_list:
-        if num1 in line and num2 in line:
-            index1 = line.index(num1)
-            index2 = line.index(num2)
-
-            if index1 > index2:
-                to_swap = True
-                break
-    
-    if to_swap:
-        for num1, num2 in int_list:
-            if num1 in line and num2 in line:
-                index1 = line.index(num1)
-                index2 = line.index(num2)
-
-                if index1 > index2:
-                    line[index1], line[index2] = line[index2], line[index1]
+    def topological_sort_for_sublist(sublist, conditions):
+        graph = defaultdict(set)
+        in_degree = defaultdict(int)
         
-        incorrectly_ordered.append(line)
+        for x, y in conditions:
+            if x in sublist and y in sublist:
+                if y not in graph[x]:
+                    graph[x].add(y)
+                    in_degree[y] += 1
+                if x not in in_degree:
+                    in_degree[x] = 0
         
+        # Kahn's algorithm
+        queue = deque([node for node in sublist if in_degree[node] == 0])
+        result = []
+
+        while queue:
+            node = queue.popleft()
+            result.append(node)
+            for neighbor in graph[node]:
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+
+        return result
+
+    sorted_sublists = []
+    for sublist in lists:
+        if not is_sorted(sublist, conditions):
+            sorted_sublists.append(topological_sort_for_sublist(sublist, conditions))
+
+    return sorted_sublists
+
+
+sorted_sublists = conditional_topological_sort_sublist_by_sublist(new_pages, rule_list)
+
 to_sum = []
-
-for line in incorrectly_ordered:
+for line in sorted_sublists:
     line_length = len(line)
 
     if line_length % 2 == 0:
@@ -72,5 +93,5 @@ for line in incorrectly_ordered:
 
 for i in to_sum:
     the_sum += i
-
+    
 print(the_sum)
